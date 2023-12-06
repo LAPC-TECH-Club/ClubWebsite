@@ -4,25 +4,28 @@
       "id" : "FIM",
       "title": "Hackathon Update: Friendship is Magic",
       "description": "Have you ever wanted to contribute to greatness? A project that will blow peoples minds? As you read in the title: the theme is friendship! Build something that connects people to one another, additionally yasir has made another announcement the following week to promote the hackathon. Some words from one of our members “Man this hackathon stuff is too long. I don't know if I'll be able to finish my project in time.” But what she does know is",
-      "image": "clubmeeting.jpg",
+      "image": "friendshiphack.png",
       "published": "November 11th, 2023",
-      "lastUpdated": "November 11th, 2023"
+      "lastUpdated": "November 11th, 2023",
+      "author": "Shai Yaish"
     },
     {
       "id": "WWA",
       "title": "Wired Wonders & Arduinos",
       "description": "This week's meeting explored arduinos with hundreds of components, some of us were able to complete something, others... not so much. Imagine that I'm actually saying something valuable here, most of this is filler text. So if I keep going on and on and on. Eventually it will fill up enough of the screen for it to not matter! Gooooo TECH Club!",
-      "image": "clubphoto.jpg",
+      "image": "arduino.png",
       "published": "November 11th, 2023",
-      "lastUpdated": "November 11th, 2023"
+      "lastUpdated": "November 11th, 2023",
+      "author": "Shai Yaish"
     },
     {
       "id": "TGK",
       "title": "TECH Club Gimkit",
       "description": "This week's meeting explored arduinos with hundreds of components, some of us were able to complete something, others... not so much. Imagine that I'm actually saying something valuable here, most of this is filler text. So if I keep going on and on and on. Eventually it will fill up enough of the screen for it to not matter! Gooooo TECH Club!",
-      "image": "clubphoto.jpg",
+      "image": "clubmeeting.jpg",
       "published": "November 11th, 2023",
-      "lastUpdated": "November 11th, 2023"
+      "lastUpdated": "November 11th, 2023",
+      "author": "Shai Yaish"
     },
     {
       "id": "TFM",
@@ -30,7 +33,8 @@
       "description": "This week's meeting explored arduinos with hundreds of components, some of us were able to complete something, others... not so much. Imagine that I'm actually saying something valuable here, most of this is filler text. So if I keep going on and on and on. Eventually it will fill up enough of the screen for it to not matter! Gooooo TECH Club!",
       "image": "clubphoto.jpg",
       "published": "November 11th, 2023",
-      "lastUpdated": "November 11th, 2023"
+      "lastUpdated": "November 11th, 2023",
+      "author": "Shai Yaish"
     }
   ]
 }

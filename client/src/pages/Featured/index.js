@@ -1,6 +1,7 @@
-import styled from 'styled-components'
-import media from '../../assets/filmmaker.jpg'
-import { GetPostDetails } from './News';
+import Markdown from 'react-markdown'
+import styled from 'styled-components';
+import media from '../../assets/filmmaker.jpg';
+import { ActivePosts, GetPostDetails } from './News';
 import { useState } from 'react';
 
 const WelcomeCover = styled.div`
@@ -9,7 +10,7 @@ const WelcomeCover = styled.div`
 	left: 0;
 	background-image: url(${media});
 	background-size: cover;
-	height: 80vh;
+	height: 740px;
 	width: 100%;
 	z-index: -1;
 	outline: 3px solid #FF6969;
@@ -20,10 +21,9 @@ const Container = styled.div`
   display: flex;
   flex-direction: row;
   background-color: rgba(0,0,0,0.7);
-  height: calc(80vh - 100px);
+  height: calc(740px - 100px);
   margin-top: 100px;
-  margin-bottom: 100px;
-`
+`;
 
 const Left = styled.div` // Welcome Container Left
 	flex-grow: 0;
@@ -50,6 +50,7 @@ float: right;
   height: 100%;
   width: 90%;
   border-radius: 20px;
+  overflow: hidden;
 `;
 
 const PreviewContainer = styled.div`
@@ -58,6 +59,18 @@ const PreviewContainer = styled.div`
   width: 50%;
   padding: 30px;
   color: black;
+
+  ${(props) => {
+    if (props.hoverable) {
+      return `
+        &:hover {
+          opacity: 0.8;
+          cursor: pointer;
+          background: linear-gradient(to top, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0) 100%);
+        }
+      `
+    }
+  }}
 `;
 
 const MainImg = styled.div`
@@ -69,35 +82,43 @@ const MainImg = styled.div`
   }};
   background-size: cover;
   background-position: center center;
-  &:hover {
-    cursor: pointer;
-  }
 `;
 
 const ContentContainer = styled.div`
   height: 60%;
   width: 100%;
   padding: 10px;
-  &:hover {
-    cursor: pointer;
-  }
 `;
 
 const SubContainer = styled.div`
   height: 25%;
   width: 100%;
   border-bottom: 2px solid lightgrey;
-  padding: 10px 0px;
+  margin-top: 10px;
+  padding-bottom: 10px;
 
   &:hover {
     cursor: pointer;
+    opacity: 0.8;
+    background: linear-gradient(to top, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0) 100%);
+    border-radius: 20px;
   }
+
+  ${(props) => {
+    if (props.noimage) {
+      return `
+        padding-left: 10px;
+        padding-right: 10px;
+      `
+    }
+  }}
 `;
 
 const Title = styled.div`
   color: black;
   font-weight: bold;
   font-size: 28px;
+  margin-bottom: 5px;
 `;
 
 const SubTitle = styled.div`
@@ -108,12 +129,26 @@ const SubTitle = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 5px;
-`
+`;
 
 const LastUpdated = styled.div`
-  color: lightgrey;
-  font-size: 12px;
+  color: grey;
+  font-size: 12pt;
+  ${(props) => {
+    if (props.loaded) {
+      return (`
+        padding: 10px 0px;
+        border-bottom: 2px solid lightgrey;
+        margin-bottom: 5px;
+      `)
+    }
+  }}
 `;
+
+const Author = styled.span`
+  color: black;
+  font-weight: bold;
+`
 
 const Description = styled.div`
   display: -webkit-box;
@@ -123,7 +158,7 @@ const Description = styled.div`
   overflow: hidden;
   white-space: normal;
   color: black;
-  font-size: 18px;
+  font-size: 14pt;
 `;
 
 const NewsOverlay = styled.div`
@@ -134,7 +169,7 @@ const NewsOverlay = styled.div`
   background-color: rgba(0,0,0,0.6);
   width: 100%;
   height: 100vh;
-  padding: 0px 300px;
+  padding: 0px 400px;
   z-index: 100;
   overflow-y: auto;
 `;
@@ -146,51 +181,155 @@ const LoadedNews = styled.div`
   padding: 30px;
   border-radius: 20px;
   width: calc(100%);
+  font-size: 14pt;
 `;
 
-function loadNews(id) {
-  console.log(id);
+const Image = styled.div`
+  height: 300px;
+  width: 100%;
+  background-size: cover;
+  background-position: center center;
+  border-radius: 10px;
+`;
+
+const CloseOverlay = styled.div`
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(200,20,148,0);
+  cursor: pointer;
+`
+
+const ArticlesContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: max-content;
+`
+
+const Article = styled.div`
+  display: flex;
+  flex-direction: row;
+  height: max-content;
+  width: 50%;
+  padding: 30px;
+  border-bottom: 2px solid lightgray;
+  border-radius: 10px;
+
+  &:hover {
+    opacity: 0.8;
+    background-color: rgba(0,0,0,0.1);
+    cursor: pointer;
+  }
+`
+
+const ArticleImage = styled.div`
+  width: 50%;
+  background-position: center center;
+  background-size: cover;
+  min-height: 200px;
+  max-height: 400px;
+`
+
+const Spacer = styled.div`
+  height: 50px;
+  width: 50%;
+`
+
+function CharacterCutoff(maxCharacters, input) {
+  let newString = input;
+  if (input.length > maxCharacters) {
+    newString = input.substring(0,(maxCharacters - 1)) + "...";
+  }
+  return newString;
 }
 
 function Featured() {
-  let mainPost = GetPostDetails("FIM");
-  let subMain = GetPostDetails("WWA");
-  let subPost = GetPostDetails("TGK");
-  let subPost2 = GetPostDetails("TFM");
+  // TODO: Convert this list of variables to a simple array
+  let posts = ActivePosts()
+  let mainPost = posts[0];
+  let subMain = posts[1];
+  let subPost = posts[2];
+  let subPost2 = posts[3];
 
-  const [img, setImg] = useState(mainPost.img);
-  const [title, setTitle] = useState(mainPost.title)
-  const [description, setDescription] = useState(mainPost.description)
+  const [img, setImg] = useState(mainPost.image);
+  const [title, setTitle] = useState(mainPost.title);
+  const [description, setDescription] = useState(mainPost.description);
+  const [lastUpdated, setLastUpdated] = useState(mainPost.lastUpdated);
+  const [author, setAuthor] = useState(mainPost.author);
+  const [scrollPos, setPos] = useState(0);
 
+  function loadNews(id) {
+    let post = GetPostDetails(id);
+    setImg(post.image);
+    setTitle(post.title);
+    setDescription(post.description);
+    setLastUpdated(post.lastUpdated);
+    setAuthor(post.author);
+    setPos(document.documentElement.scrollTop)
+
+    let overlay = document.getElementById("overlay");
+    overlay.style = "display: block";
+    overlay.scrollTop = 0;
+    document.body.style = "overflow-y: scroll; position: fixed; top: -" + document.documentElement.scrollTop + "px;";
+    document.getElementById("closer").style = "height: calc(400px + " + document.getElementById("article").offsetHeight + "px)";
+  }
+
+  function closeOverlay() {
+    document.getElementById("overlay").style = "display: none";
+    document.body.style = " position: static;";
+    document.documentElement.scrollTop = scrollPos;
+  }
+
+  function LoadArticles() {
+    let articles = []
+    let posts = ActivePosts();
+    
+    for (let i = 0; i < posts.length; i++) {
+      articles.push(<Article key={posts[i].id} onClick={() => {loadNews(posts[i].id)}}>
+          <ArticleImage style={{backgroundImage: 'url(' + require("../../assets/" + posts[i].image) + ')'}}></ArticleImage>
+          <div style={{flex: 1, marginLeft: '20px'}}>
+            <Title>{posts[i].title}</Title>
+            <Description style={{WebkitLineClamp: 'unset'}}>{CharacterCutoff(170, posts[i].description)}</Description>
+          </div>
+      </Article>)
+    }
+  
+    return articles;
+  }
+  
   return (<div>
     <WelcomeCover />
     <Container>
       <Left>
         <NewsPreview>
-          <PreviewContainer onClick={() => {loadNews(mainPost.id)}} style={{borderRight: '2px solid lightgrey'}}>
+          <PreviewContainer hoverable="true" onClick={() => {loadNews(mainPost.id)}} style={{borderRight: '2px solid lightgrey'}}>
             <MainImg src={require("../../assets/" + mainPost.image)} />
             <ContentContainer>
               <Title>{mainPost.title}</Title>
               <LastUpdated>Last Updated: {mainPost.lastUpdated}</LastUpdated>
-              <Description style={{webkitLineClamp: '7'}}>{mainPost.description}</Description>
+              <Description style={{WebkitLineClamp: '7'}}>{mainPost.description}</Description>
             </ContentContainer>
           </PreviewContainer>
           
           <PreviewContainer>
-            <SubContainer onClick={() => {loadNews(subMain.id)}} style={{height: '50%'}}>
+            <SubContainer onClick={() => {loadNews(subMain.id)}} style={{height: '58%'}}>
               <MainImg src={require("../../assets/" + subMain.image)} />
               <ContentContainer>
                 <SubTitle>{subMain.title}</SubTitle>
-                <Description style={{webkitLineClamp: '3'}}>{subMain.description}</Description>
+                <Description style={{WebkitLineClamp: '3'}}>{subMain.description}</Description>
               </ContentContainer>
             </SubContainer>
 
-            <SubContainer onClick={() => {loadNews(subPost.id)}}>
+            <SubContainer noimage="true" onClick={() => {loadNews(subPost.id)}}>
               <SubTitle>{subPost.title}</SubTitle>
               <Description>{subPost.description}</Description>
             </SubContainer>
 
-            <SubContainer onClick={() => {loadNews(subPost2.id)}} style={{border: 'none'}}>
+            <SubContainer noimage="true" onClick={() => {loadNews(subPost2.id)}} style={{border: 'none'}}>
               <SubTitle>{subPost2.title}</SubTitle>
               <Description>{subPost2.description}</Description>
             </SubContainer>
@@ -201,29 +340,27 @@ function Featured() {
       <Right>
       </Right>
     </Container>
-    <NewsOverlay>
-      <div style={{height: '200px', width: '100%'}}></div>
-      <LoadedNews>
-        <Title>FriendShip is Magic</Title>
-        <LastUpdated cyb2>Novermber 11th, 2023</LastUpdated>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Et ultrices neque ornare aenean. Integer enim neque volutpat ac tincidunt vitae semper quis. Ornare aenean euismod elementum nisi quis eleifend. Cras tincidunt lobortis feugiat vivamus at augue. Feugiat sed lectus vestibulum mattis. Feugiat vivamus at augue eget arcu dictum varius duis. At imperdiet dui accumsan sit amet nulla facilisi. Diam quis enim lobortis scelerisque fermentum dui faucibus in. Auctor eu augue ut lectus arcu bibendum. Risus nullam eget felis eget nunc lobortis. Quis auctor elit sed vulputate.
-        In egestas erat imperdiet sed. Cras ornare arcu dui vivamus arcu felis bibendum ut. Mauris pellentesque pulvinar pellentesque habitant morbi tristique senectus et netus. Aliquet eget sit amet tellus cras adipiscing enim eu turpis. Quam viverra orci sagittis eu volutpat. In ante metus dictum at tempor commodo ullamcorper. Ultrices dui sapien eget mi proin sed libero. Viverra vitae congue eu consequat ac felis donec et odio. Et odio pellentesque diam volutpat commodo sed egestas egestas. Nulla pellentesque dignissim enim sit amet venenatis. Eu ultrices vitae auctor eu augue ut lectus. At elementum eu facilisis sed odio morbi quis commodo odio. Proin nibh nisl condimentum id venenatis a condimentum vitae sapien. Viverra mauris in aliquam sem fringilla ut morbi tincidunt augue. Aenean sed adipiscing diam donec. Viverra suspendisse potenti nullam ac tortor vitae purus. Et netus et malesuada fames. Venenatis lectus magna fringilla urna. Odio ut sem nulla pharetra diam sit amet nisl.
 
-        Amet dictum sit amet justo. Quam adipiscing vitae proin sagittis nisl rhoncus mattis rhoncus. Dictumst quisque sagittis purus sit. Ullamcorper eget nulla facilisi etiam dignissim diam quis enim. Feugiat vivamus at augue eget arcu dictum varius duis at. Bibendum est ultricies integer quis auctor elit sed vulputate mi. Quam quisque id diam vel quam elementum pulvinar etiam. Sit amet est placerat in egestas erat imperdiet. Nunc mi ipsum faucibus vitae aliquet nec ullamcorper sit amet. Ullamcorper a lacus vestibulum sed arcu non odio euismod lacinia. Nam at lectus urna duis convallis convallis tellus id interdum. Arcu dui vivamus arcu felis bibendum. Viverra mauris in aliquam sem. Euismod lacinia at quis risus sed vulputate odio ut. Nisl rhoncus mattis rhoncus urna neque viverra justo.
+    <ArticlesContainer>
+      <Spacer style={{borderBottom: '2px solid grey'}} />
+      {LoadArticles()}
+      <Spacer />
+    </ArticlesContainer>
 
-        Porttitor lacus luctus accumsan tortor. Integer vitae justo eget magna fermentum iaculis eu. Pulvinar proin gravida hendrerit lectus. Tortor posuere ac ut consequat semper viverra nam libero. Nisi lacus sed viverra tellus in hac. Auctor elit sed vulputate mi. Rhoncus mattis rhoncus urna neque viverra justo nec ultrices. Enim eu turpis egestas pretium aenean pharetra magna ac. Leo urna molestie at elementum. Magna sit amet purus gravida quis.
-
-        At in tellus integer feugiat. Ipsum faucibus vitae aliquet nec ullamcorper sit amet. Malesuada fames ac turpis egestas integer eget aliquet nibh. In nisl nisi scelerisque eu ultrices vitae. Vitae tempus quam pellentesque nec nam aliquam sem et tortor. Ullamcorper sit amet risus nullam eget felis eget nunc. Pulvinar elementum integer enim neque volutpat ac tincidunt vitae. Sit amet aliquam id diam maecenas ultricies mi eget. Eget mauris pharetra et ultrices neque ornare. Lectus nulla at volutpat diam ut venenatis tellus in. Phasellus vestibulum lorem sed risus. Imperdiet proin fermentum leo vel. Justo eget magna fermentum iaculis. Nascetur ridiculus mus mauris vitae ultricies leo. Turpis egestas pretium aenean pharetra magna. At imperdiet dui accumsan sit amet nulla. Volutpat consequat mauris nunc congue nisi vitae suscipit tellus.
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Et ultrices neque ornare aenean. Integer enim neque volutpat ac tincidunt vitae semper quis. Ornare aenean euismod elementum nisi quis eleifend. Cras tincidunt lobortis feugiat vivamus at augue. Feugiat sed lectus vestibulum mattis. Feugiat vivamus at augue eget arcu dictum varius duis. At imperdiet dui accumsan sit amet nulla facilisi. Diam quis enim lobortis scelerisque fermentum dui faucibus in. Auctor eu augue ut lectus arcu bibendum. Risus nullam eget felis eget nunc lobortis. Quis auctor elit sed vulputate.
-
-        In egestas erat imperdiet sed. Cras ornare arcu dui vivamus arcu felis bibendum ut. Mauris pellentesque pulvinar pellentesque habitant morbi tristique senectus et netus. Aliquet eget sit amet tellus cras adipiscing enim eu turpis. Quam viverra orci sagittis eu volutpat. In ante metus dictum at tempor commodo ullamcorper. Ultrices dui sapien eget mi proin sed libero. Viverra vitae congue eu consequat ac felis donec et odio. Et odio pellentesque diam volutpat commodo sed egestas egestas. Nulla pellentesque dignissim enim sit amet venenatis. Eu ultrices vitae auctor eu augue ut lectus. At elementum eu facilisis sed odio morbi quis commodo odio. Proin nibh nisl condimentum id venenatis a condimentum vitae sapien. Viverra mauris in aliquam sem fringilla ut morbi tincidunt augue. Aenean sed adipiscing diam donec. Viverra suspendisse potenti nullam ac tortor vitae purus. Et netus et malesuada fames. Venenatis lectus magna fringilla urna. Odio ut sem nulla pharetra diam sit amet nisl.
-
-        Amet dictum sit amet justo. Quam adipiscing vitae proin sagittis nisl rhoncus mattis rhoncus. Dictumst quisque sagittis purus sit. Ullamcorper eget nulla facilisi etiam dignissim diam quis enim. Feugiat vivamus at augue eget arcu dictum varius duis at. Bibendum est ultricies integer quis auctor elit sed vulputate mi. Quam quisque id diam vel quam elementum pulvinar etiam. Sit amet est placerat in egestas erat imperdiet. Nunc mi ipsum faucibus vitae aliquet nec ullamcorper sit amet. Ullamcorper a lacus vestibulum sed arcu non odio euismod lacinia. Nam at lectus urna duis convallis convallis tellus id interdum. Arcu dui vivamus arcu felis bibendum. Viverra mauris in aliquam sem. Euismod lacinia at quis risus sed vulputate odio ut. Nisl rhoncus mattis rhoncus urna neque viverra justo.
-
-        Porttitor lacus luctus accumsan tortor. Integer vitae justo eget magna fermentum iaculis eu. Pulvinar proin gravida hendrerit lectus. Tortor posuere ac ut consequat semper viverra nam libero. Nisi lacus sed viverra tellus in hac. Auctor elit sed vulputate mi. Rhoncus mattis rhoncus urna neque viverra justo nec ultrices. Enim eu turpis egestas pretium aenean pharetra magna ac. Leo urna molestie at elementum. Magna sit amet purus gravida quis.
-
-        At in tellus integer feugiat. Ipsum faucibus vitae aliquet nec ullamcorper sit amet. Malesuada fames ac turpis egestas integer eget aliquet nibh. In nisl nisi scelerisque eu ultrices vitae. Vitae tempus quam pellentesque nec nam aliquam sem et tortor. Ullamcorper sit amet risus nullam eget felis eget nunc. Pulvinar elementum integer enim neque volutpat ac tincidunt vitae. Sit amet aliquam id diam maecenas ultricies mi eget. Eget mauris pharetra et ultrices neque ornare. Lectus nulla at volutpat diam ut venenatis tellus in. Phasellus vestibulum lorem sed risus. Imperdiet proin fermentum leo vel. Justo eget magna fermentum iaculis. Nascetur ridiculus mus mauris vitae ultricies leo. Turpis egestas pretium aenean pharetra magna. At imperdiet dui accumsan sit amet nulla. Volutpat consequat mauris nunc congue nisi vitae suscipit tellus.
+    <NewsOverlay id="overlay">
+      <CloseOverlay id="closer" onClick={() => {closeOverlay()}}></CloseOverlay>
+      <div style={{height: '100px', width: '100%'}}></div>
+      <LoadedNews id="article">
+        <Image style={{backgroundImage: 'url('+require("../../assets/"+img)+')'}}></Image>
+        <div style={{padding: '5px 10px'}}>
+          <Title style={{fontSize: '32pt'}}>{title}</Title>
+          <LastUpdated loaded="true">Last Updated: {lastUpdated}<Author>&nbsp;- By: {author}</Author></LastUpdated>
+          <Markdown>
+            {description}
+          </Markdown>
+        </div>
       </LoadedNews>
+      <div style={{height: '200px', width: '100%'}}></div>
     </NewsOverlay>
   </div>)
 }

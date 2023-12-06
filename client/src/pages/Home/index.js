@@ -1,15 +1,14 @@
 import styled from 'styled-components';
 import Typewriter from 'typewriter-effect';
-import clubMeeting from '../../assets/clubmeeting.jpg';
 import codeLines from '../../assets/codelines.jpg';
 import clubPhoto from '../../assets/clubphoto.jpg';
-import { GetPostDetails } from '../Featured/News.js';
+import { GetMainPost } from '../Featured/News.js';
 import { Information, LeftImage, TopTitle } from '../../components/Widgets.js';
 
 const WelcomeContainer = styled.div`
 	display: flex;
 	flex-direction: row;
-	height: 64vh;
+	height: 560px;
 	background-color: rgba(0,0,0,0.4);
 	padding: 150px 160px;
 	color: white;
@@ -43,7 +42,7 @@ const WelcomeCover = styled.div`
 	left: 0;
 	background-image: url(${codeLines});
 	background-size: cover;
-	height: 64vh;
+	height: 560px;
 	width: 100%;
 	z-index: -1;
 	outline: 3px solid #FF6969;
@@ -67,7 +66,6 @@ const NewsWidgetContainer = styled.div`
 `;
 
 const NewsImage = styled.div`
-	background-image: url(${clubMeeting});
 	background-size: cover;
 	height: calc(100% - 20px);
 	width: auto;
@@ -158,6 +156,8 @@ function Home() {
 	const WelcomeMessage2 = `<span id="joeparent"><span style="width: max-content; whitespace: nowrap">There's a place where you belong.</span>&nbsp;
 	<a id="joe" href="/join" class="opacity-0" style="display: none;">Join Us</a></span>`
 
+	let main = GetMainPost();
+
 	return (
 		<div style={{display: 'flex', flexDirection: 'column'}}>
 			<WelcomeCover />
@@ -195,15 +195,15 @@ function Home() {
 				<WRight>
 					Latest News
 					<NewsWidgetContainer>
-						<NewsImage />
+						<NewsImage style={{backgroundImage: 'url('+ require("../../assets/" + main.image) + ')'}} />
 						<NewsGradient>
 							<div style={{width: '80%'}}>
-								{GetPostDetails("FIM").title}
+								{main.title}
 							</div>
 							<NDivider />
 							<div style={{display: 'flex'}}>
 								<NewsDetails>
-									{GetPostDetails("FIM").description}
+									{main.description}
 								</NewsDetails>
 								<ReadMore href="/featured">
 									&gt; Read More
