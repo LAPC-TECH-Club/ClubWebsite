@@ -232,6 +232,7 @@ const ArticleImage = styled.div`
   background-size: cover;
   min-height: 200px;
   max-height: 400px;
+  border-radius: 10px;
 `
 
 const Spacer = styled.div`

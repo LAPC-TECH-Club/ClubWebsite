@@ -154,7 +154,7 @@ function Home() {
 	`
 
 	const WelcomeMessage2 = `<span id="joeparent"><span style="width: max-content; whitespace: nowrap">There's a place where you belong.</span>&nbsp;
-	<a id="joe" href="/join" class="opacity-0" style="display: none;">Join Us</a></span>`
+	<a id="joe" href="/about" class="opacity-0" style="display: none;">Join Us</a></span>`
 
 	let main = GetMainPost();
 
